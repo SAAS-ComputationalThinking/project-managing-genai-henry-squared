@@ -1,39 +1,51 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const player = document.getElementById('player');
-  const platforms = document.querySelectorAll('.platform');
-
-  let isJumping = false;
-  let gravity = 0.9;
-  let jumpCount = 0;
+  const bird = document.getElementById('bird');
+  const pipe = document.getElementById('pipe');
+  let score = 0;
 
   function jump() {
-      let jumpInterval = setInterval(function () {
-          let playerBottom = parseInt(window.getComputedStyle(player).getPropertyValue('bottom'));
-          if (playerBottom >= 200) {
-              clearInterval(jumpInterval);
-              let fallInterval = setInterval(function () {
-                  player.style.bottom = (parseInt(player.style.bottom) - gravity) + 'px';
-                  if (parseInt(player.style.bottom) <= 0) {
-                      clearInterval(fallInterval);
-                      player.style.bottom = '0px';
-                      isJumping = false;
-                  }
-              }, 10);
-          } else {
-              player.style.bottom = (playerBottom + 15) + 'px';
-              jumpCount++;
-              if (jumpCount >= 15) {
-                  clearInterval(jumpInterval);
-                  jumpCount = 0;
-              }
+      bird.style.transition = 'transform 0.3s';
+      bird.style.transform = 'translateY(-60px)';
+      setTimeout(function () {
+          bird.style.transform = 'translateY(0)';
+      }, 300);
+  }
+
+  function movePipe() {
+      let pipeLeft = parseInt(window.getComputedStyle(pipe).getPropertyValue('left'));
+      if (pipeLeft <= -80) {
+          pipe.style.left = '400px';
+          score++;
+      } else {
+          pipe.style.left = (pipeLeft - 5) + 'px';
+      }
+  }
+
+  function checkCollision() {
+      let birdTop = parseInt(window.getComputedStyle(bird).getPropertyValue('top'));
+      let birdLeft = parseInt(window.getComputedStyle(bird).getPropertyValue('left'));
+      let pipeTop = parseInt(window.getComputedStyle(pipe).getPropertyValue('height'));
+      let pipeLeft = parseInt(window.getComputedStyle(pipe).getPropertyValue('left'));
+      if (birdLeft + 40 >= pipeLeft && birdLeft <= pipeLeft + 80) {
+          if (birdTop <= pipeTop || birdTop + 40 >= pipeTop + 150) {
+              endGame();
           }
-      }, 30);
+      }
+  }
+
+  function endGame() {
+      alert('Game Over! Your score: ' + score);
+      location.reload();
   }
 
   document.addEventListener('keydown', function (event) {
-      if (event.key === ' ' && !isJumping) {
-          isJumping = true;
+      if (event.key === ' ' || event.keyCode === 38) {
           jump();
       }
   });
+
+  setInterval(function () {
+      movePipe();
+      checkCollision();
+  }, 50);
 });
