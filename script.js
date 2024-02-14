@@ -1,34 +1,36 @@
 document.addEventListener('DOMContentLoaded', function () {
   const bird = document.getElementById('bird');
   const pipe = document.getElementById('pipe');
+  const gameContainer = document.getElementById('game-container');
   let score = 0;
+  let jumpHeight = 0;
+  let isJumping = false;
 
   function jump() {
-    let jumpCount = 0;
-    let jumpInterval = setInterval(function () {
-        if (jumpCount >= 15) {
-            clearInterval(jumpInterval);
-            return;
-        }
-        bird.style.transition = 'transform 0.3s';
-        bird.style.transform = 'translateY(-' + (jumpCount * 4) + 'px)';
-        jumpCount++;
-    }, 10);
+      isJumping = true;
+      let jumpCount = 0;
+      let jumpInterval = setInterval(function () {
+          if (jumpCount >= jumpHeight) {
+              clearInterval(jumpInterval);
+              isJumping = false;
+              return;
+          }
+          bird.style.transition = 'transform 0.3s';
+          bird.style.transform = 'translateY(-' + (jumpCount * 4) + 'px)';
+          jumpCount++;
+      }, 10);
+  }
 
-    setTimeout(function () {
-        let downCount = 0;
-        let downInterval = setInterval(function () {
-            if (downCount >= jumpCount) {
-                clearInterval(downInterval);
-                return;
-            }
-            bird.style.transition = 'transform 0.3s';
-            bird.style.transform = 'translateY(' + (downCount * 4) + 'px)';
-            downCount++;
-        }, 10);
-    }, 300);
-}
-
+  function applyGravity() {
+      if (!isJumping) {
+          let birdRect = bird.getBoundingClientRect();
+          let gameRect = gameContainer.getBoundingClientRect();
+          if (birdRect.bottom < gameRect.bottom) {
+              bird.style.transition = 'transform 0.3s';
+              bird.style.transform = 'translateY(' + (4) + 'px)';
+          }
+      }
+  }
 
   function movePipe() {
       let pipeLeft = parseInt(window.getComputedStyle(pipe).getPropertyValue('left'));
@@ -41,22 +43,18 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function checkCollision() {
-    let birdTop = parseInt(window.getComputedStyle(bird).getPropertyValue('top'));
-    let birdLeft = parseInt(window.getComputedStyle(bird).getPropertyValue('left'));
-    let pipeTop = parseInt(window.getComputedStyle(pipe).getPropertyValue('height'));
-    let pipeBottom = parseInt(window.getComputedStyle(pipe).getPropertyValue('top')) + pipeTop;
-    let pipeLeft = parseInt(window.getComputedStyle(pipe).getPropertyValue('left'));
-    let birdBottom = birdTop + 40; // Assuming the bird's height is 40px
+      let birdRect = bird.getBoundingClientRect();
+      let pipeRect = pipe.getBoundingClientRect();
 
-    if (
-        (birdLeft + 40 >= pipeLeft && birdLeft <= pipeLeft + 80) &&
-        ((birdTop <= pipeTop || birdBottom >= pipeBottom) ||
-        (birdTop + 40 >= pipeTop + 150 || birdBottom <= pipeBottom - 150))
-    ) {
-        endGame();
-    }
-}
-
+      if (
+          birdRect.right > pipeRect.left &&
+          birdRect.left < pipeRect.right &&
+          birdRect.bottom > pipeRect.top &&
+          birdRect.top < pipeRect.bottom
+      ) {
+          endGame();
+      }
+  }
 
   function endGame() {
       alert('Game Over! Your score: ' + score);
@@ -65,16 +63,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
   document.addEventListener('keydown', function (event) {
       if (event.key === ' ' || event.keyCode === 38) {
-          jump();
+          if (!isJumping) {
+              jumpHeight += 15; // Increase jump height
+              jump();
+          }
       }
   });
 
   document.addEventListener('keyup', function (event) {
-      // Add keyup functionality here if needed
+      if (event.key === ' ' || event.keyCode === 38) {
+          jumpHeight = 0; // Reset jump height
+      }
   });
 
   setInterval(function () {
       movePipe();
       checkCollision();
+      applyGravity(); // Apply gravity continuously
   }, 50);
 });
