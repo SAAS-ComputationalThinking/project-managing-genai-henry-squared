@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
   const bird = document.getElementById('bird');
   const pipe = document.getElementById('pipe');
+  const bar = document.getElementById('bar');
   const gameContainer = document.getElementById('game-container');
   let score = 0;
   let jumpHeight = 0;
@@ -16,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
               return;
           }
           bird.style.transition = 'transform 0.3s';
-          bird.style.transform = 'translateY(-' + (jumpCount * 4) + 'px)';
+          bird.style.transform = 'translateY(-' + (jumpCount * 3) + 'px)';
           jumpCount++;
       }, 10);
   }
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
           let gameRect = gameContainer.getBoundingClientRect();
           if (birdRect.bottom < gameRect.bottom) {
               bird.style.transition = 'transform 0.3s';
-              bird.style.transform = 'translateY(' + (4) + 'px)';
+              bird.style.transform = 'translateY(' + (260) + 'px)';
           }
       }
   }
@@ -56,6 +57,30 @@ document.addEventListener('DOMContentLoaded', function () {
       }
   }
 
+  function moveBar() {
+    let barLeft = parseInt(window.getComputedStyle(bar).getPropertyValue('left'));
+    if (barLeft <= -80) {
+        bar.style.left = '400px';
+        score++;
+    } else {
+        bar.style.left = (barLeft - 5) + 'px';
+    }
+}
+
+function checkCollision() {
+    let birdRect = bird.getBoundingClientRect();
+    let barRect = bar.getBoundingClientRect();
+
+    if (
+        birdRect.right > barRect.left &&
+        birdRect.left < barRect.right &&
+        birdRect.bottom > barRect.top &&
+        birdRect.top < barRect.bottom
+    ) {
+        endGame();
+    }
+}
+
   function endGame() {
       alert('Game Over! Your score: ' + score);
       location.reload();
@@ -78,6 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   setInterval(function () {
       movePipe();
+      moveBar();
       checkCollision();
       applyGravity(); // Apply gravity continuously
   }, 50);

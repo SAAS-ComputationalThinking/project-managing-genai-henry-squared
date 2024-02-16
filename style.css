@@ -24,3 +24,12 @@
   top: 0;
   left: 400px;
 }
+
+#bar {
+  width: 80px;
+  height: 300px; /* Adjust height as needed */
+  background-color: #ff0000; /* red */
+  position: absolute;
+  top: 500px; /* Adjust the top position to place it below the pipe */
+  left: 400px; /* Adjust the left position to align it with the pipe */
+}
